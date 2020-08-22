@@ -13,11 +13,11 @@ Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
 
 void sendNoteOn(int note, int velocity, int chan) {
-    Serial.printf("WORKS! %d %d %d\n", note, velocity, chan);
+//    Serial.printf("WORKS! %d %d %d\n", note, velocity, chan);
     MIDI.sendNoteOn(note, velocity, chan);
 };
 void sendNoteOff(int note, int velocity, int chan) {
-    Serial.printf("WORKS! %d %d %d\n", note, velocity, chan);
+//    Serial.printf("WORKS! %d %d %d\n", note, velocity, chan);
     MIDI.sendNoteOff(note, velocity, chan);
 };
 
@@ -25,12 +25,12 @@ XiaoPiezoDrum drum(9, 2, 3, 4);
 
 
 void setup() {
-//    MIDI.begin(MIDI_CHANNEL_OMNI);
-    drum.setNoteComFunctions(sendNoteOn);
+    MIDI.begin(MIDI_CHANNEL_OMNI);
+    drum.setNoteOnFunc(sendNoteOn);
+    drum.setNoteOffFunc(sendNoteOff);
 }
 
 void loop() {
     drum.RunCycle();
     delay(1);
-
 }

@@ -10,11 +10,11 @@
 #include "Buffer.h"
 
 
-#define THRESHOLD 5
+#define THRESHOLD 8
 #define OFF_THRESH 5
-#define SAMPLE_TIME 40
-#define REST_TIME 30
-#define NOTE_LENGTH 20
+#define SAMPLE_TIME 10
+#define REST_TIME 20
+#define NOTE_LENGTH 10
 
 using namespace std;
 
@@ -30,20 +30,23 @@ public:
     XiaoPiezoDrum(int rPin, int gPin, int bPin);
     XiaoPiezoDrum(int piezoPin, int rPin, int gPin, int bPin);
     void RunCycle();
-    void setNoteComFunctions(const function<void(int, int, int)>& onFunc);
+    void setNoteOnFunc(const function<void(int, int, int)>& onFunc);
+    void setNoteOffFunc(const function<void(int, int, int)>& offFunc);
 //    void setNoteComFunctions();
 
 private:
     RGBLED LED;
     unsigned long lastTriggered = millis();
-    double MaxVal = 0;
+    double MaxVal = 0;  // used for calculating velocity.
     PiezoSensor sensor;
+    int Note = 40;
     int loopCounter = 0;  // for counting the number of samples gathered during trigger
     bool trigger = false;  // to trigger the process of calculating strike velocity
     bool triggering = false;  // for the time period of collecting velocity data before note is sent
     bool triggered = false;  // true once a midi not has been sent and set false when past the note length period
     bool resting = false;  // true once noteoff signal has been sent until REST_TIME ms has passed
-    unsigned long triggerTime;
+    unsigned long triggerStartTime;
+    unsigned long triggerSentTime;
     unsigned long noteEndTime;
     RunningAverage triggerBuffer;  // was sampleValues
     bool comFunctionsSet = false;
