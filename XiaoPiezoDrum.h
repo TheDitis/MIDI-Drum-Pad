@@ -13,7 +13,7 @@
 #define THRESHOLD 15
 #define OFF_THRESH 15
 #define SAMPLE_TIME 14
-#define NOTE_LENGTH 10
+#define NOTE_LENGTH 20
 #define REST_TIME 20
 #define RIMSHOT_THRESH 200
 
@@ -41,12 +41,13 @@ private:
     double MaxVal = 0;  // used for calculating velocity.
     double MaxValRim = 0;
     PiezoSensor sensor;
+    double SensorReading = 0;
     int Note = 40;
     int NoteRim = 41;
     int PlayNoteNumber;
-    int loopCounter = 0;  // for counting the number of samples gathered during trigger
+    int loopCounter = 0;  // for counting the number of samples gathered during strikeDetected
     bool rimshot = false;
-    bool trigger = false;  // to trigger the process of calculating strike velocity
+    bool strikeDetected = false;  // to strikeDetected the process of calculating strike velocity
     bool triggering = false;  // for the time period of collecting velocity data before note is sent
     bool triggered = false;  // true once a midi not has been sent and set false when past the note length period
     bool resting = false;  // true once noteoff signal has been sent until REST_TIME ms has passed
@@ -55,8 +56,13 @@ private:
     unsigned long noteEndTime;
     RunningAverage triggerBuffer;  // was sampleValues
     bool comFunctionsSet = false;
-    function<void(int, int, int)> sendNote;
-    function<void(int, int, int)> noteOff;
+    function<void(int, int, int)> sendNoteHandler;
+    function<void(int, int, int)> noteOffHandler;
+    void TriggerHit();
+    void CalculateAndSendNote();
+    void NoteOffCountdown();
+    void DetermineRestingState();
+    void SerialPlotStages();
 };
 
 #endif //XIAOPIEZODRUM_XIAOPIEZODRUM_H

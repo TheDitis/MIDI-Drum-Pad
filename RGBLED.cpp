@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "RGBLED.h"
 
-
 RGBLED::RGBLED(int rPin, int gPin, int bPin) {
     /*  Constructor for common cathode RGB LEDs
      *  Pass the PWM-enabled pin number for each color 
@@ -22,8 +21,6 @@ RGBLED::RGBLED(int rPin, int gPin, int bPin) {
     blue = 0;
     setColor(red, green, blue);  // set cr
 }
-
-
 
 RGBLED::RGBLED(int rPin, int gPin, int bPin, int anodePin) {
     /*  Constructor for common anode RGB LEDs
@@ -54,7 +51,6 @@ RGBLED::RGBLED(int rPin, int gPin, int bPin, int anodePin) {
     setColor(red, green, blue);  // set color
 }
 
-
 void RGBLED::setColor(int r, int g, int b) {
     // set color attributes to given values
     red = r;
@@ -74,7 +70,6 @@ void RGBLED::setColor(int r, int g, int b) {
     analogWrite(bluePin, b);
 }
 
-
 void RGBLED::setPins(int rPin, int gPin, int bPin) {
     // set the pinNumbers to those provided:
     redPin = rPin;
@@ -91,6 +86,7 @@ void RGBLED::setPins(int rPin, int gPin, int bPin) {
     blue = 0;
     setColor(red, green, blue);  // set cr
 }
+
 void RGBLED::setPins(int rPin, int gPin, int bPin, int anodePin) {
     // set the pinNumbers to those provided:
     redPin = rPin;
@@ -115,34 +111,33 @@ void RGBLED::setPins(int rPin, int gPin, int bPin, int anodePin) {
     setColor(red, green, blue);  // set color
 }
 
-
 void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
     int startTime = millis();  // time that fade starts
-    int timeElapsed = 0;  
+    int timeElapsed = 0;
     // create float versions of each color:
     double rVal = red;
     double gVal = green;
     double bVal = blue;
     // get differences between current and target values for each color:
-    double rDiff = r - red;  
+    double rDiff = r - red;
     double gDiff = g - green;
     double bDiff = b - blue;
     double rInterval, gInterval, bInterval;  // intervals to change by for each color
-    // booleans for each color representing whether or not the number of steps between 
+    // booleans for each color representing whether or not the number of steps between
     // starting and target colors is greater than half the duration in ms
     bool rFast = abs(rDiff * 2) > msDuration;
     bool gFast = abs(gDiff * 2) > msDuration;
     bool bFast = abs(bDiff * 2) > msDuration;
 
-    /* 
+    /*
      *  for each color:
-     *     if there is no change to be made: 
+     *     if there is no change to be made:
      *         assign interval to a high number that won't be reached (about 115 days)
-     *     otherwise: 
+     *     otherwise:
      *         if the duration in ms is smaller than twice the color difference:
      *             assign interval to the number of units to increment by per ms
      *         otherwise:
-     *             assign interval to the number of ms we want between each value increment for that color           
+     *             assign interval to the number of ms we want between each value increment for that color
      */
 
     if (rDiff == 0) rInterval = 9999999999;
@@ -188,15 +183,15 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
         if (!rFast || !gFast || !bFast) {
 
             // for each color that is changing in slow mode and has a target distance greater than 5:
-          
+
             // handling slow red fade
             if (!rFast && rDiff > 5) {
                 // if the number of ms elapsed is divides evenly by the calculated interval:
-                if (timeElapsed % round(rInterval) == 0) {  
+                if (timeElapsed % round(rInterval) == 0) {
                     // if this color hasn't changed already this millisecond:
                     if (!rAlreadyChanged) {
                         // if the target difference is negative and the value is positive, reduce by 1
-                        if (rDiff < 0  && red > 0) red -= 1; 
+                        if (rDiff < 0  && red > 0) red -= 1;
                         // if the target difference is positive and the value is less than 255, increase by 1
                         else if (rDiff > 0 && red < 255) red += 1;
                         // signify that this color has been changed already this millisecond
@@ -209,7 +204,7 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
             if (!gFast && gDiff > 5) {
                 if (timeElapsed % round(gInterval) == 0) {
                     if (!gAlreadyChanged) {
-                        if (gDiff < 0  && green > 0) green -= 1; 
+                        if (gDiff < 0  && green > 0) green -= 1;
                         else if (gDiff > 0 && green < 255) green += 1;
                         gAlreadyChanged = true;
                     }
@@ -220,7 +215,7 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
             if (!bFast && bDiff > 5) {
                 if (timeElapsed % round(bInterval) == 0) {
                     if (!bAlreadyChanged) {
-                        if (bDiff < 0  && blue > 0) blue -= 1; 
+                        if (bDiff < 0  && blue > 0) blue -= 1;
                         else if (bDiff > 0 && blue < 255) blue += 1;
                         bAlreadyChanged = true;
                     }
@@ -233,16 +228,72 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
 }
 
 void RGBLED::setFadeTarget(int r, int g, int b, int msDuration) {
+    if (inChange) {
+        endFade();
+//        bool onHit = rTarget != 0 && gTarget != 255 && bTarget != 255;
+//        Serial.printf("FadeNotCompleted. Onhit: %d\n", onHit);
+    }
     inChange = true;
     fadeStartTime = millis();
+    rStart = red;
+    gStart = green;
+    bStart = blue;
     rTarget = r;
     gTarget = g;
     bTarget = b;
     fadeDuration = msDuration;
+//    Serial.printf("starts red %d green %d blue %d\n", rStart, gStart, bStart);
+//    Serial.printf("targets red %d green %d blue %d\n", rTarget, gTarget, bTarget);
 }
 
 void RGBLED::update() {
+
     if (inChange) {
-        
+        int rVal, gVal, bVal;
+        int timeInFade = millis() - fadeStartTime;
+        if (timeInFade > fadeDuration) endFade();
+        else {
+            red = map(timeInFade, 0, fadeDuration, rStart, rTarget);
+            green = map(timeInFade, 0, fadeDuration, gStart, gTarget);
+            blue = map(timeInFade, 0, fadeDuration, bStart, bTarget);
+//            Serial.printf("red %d green %d blue %d\n\n", red, green, blue);
+            setColor(red, green, blue);
+        }
     }
 }
+
+void RGBLED::endFade() {
+    setColor(rTarget, gTarget, bTarget);  // making sure we reached the target exactly;
+    inChange = false;
+    fadeStartTime = 0;
+    fadeDuration = 0;
+    rStart = red;
+    gStart = green;
+    bStart = blue;
+    rTarget = red;
+    gTarget = green;
+    bTarget = blue;
+//    rDiff = 0;
+//    gDiff = 0;
+//    bDiff = 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

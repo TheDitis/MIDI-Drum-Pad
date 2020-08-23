@@ -13,19 +13,18 @@ public:
     void setPins(int rPin, int gPin, int bPin);
     void setPins(int rPin, int gPin, int bPin, int anodePin);
     void update();
+    void endFade();
 
 private:
-    bool commonAnode = false;
-    int redPin, greenPin, bluePin;
-    int red = 0;
-    int green = 0;
-    int blue = 0;
-    bool inChange = false;
-    int fadeStartTime = 0;
-    int fadeDuration = 0;
-    int rTarget = 0;
-    int gTarget = 0;
-    int bTarget = 0;
+    bool commonAnode = false;  // whether or not the values need to be inverted before setting pins
+    int redPin, greenPin, bluePin;  // pin numbers for each color of the LED
+    int red, green, blue = 0;  // current color values of the LED
+    bool inChange = false;  // whether or not a fade is in progress
+    unsigned long fadeStartTime = 0;  // millis() time when setFadeTarget is called
+    int fadeDuration = 0;  // duration of the fade
+    int rStart, gStart, bStart = 0;  // what the color was before the fade started
+    int rTarget, gTarget, bTarget = 0;  // what the color should be when the fade is complete
+//    int rDiff, gDiff, bDiff = 0;  // the difference for each color between start and end colors
 };
 
 #endif //_RGBLED_H_
