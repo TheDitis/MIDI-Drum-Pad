@@ -10,12 +10,12 @@
 #include "Buffer.h"
 
 
-#define THRESHOLD 15
-#define OFF_THRESH 15
-#define SAMPLE_TIME 14
-#define NOTE_LENGTH 20
+#define THRESHOLD 20
+#define OFF_THRESH 10
+#define SAMPLE_TIME 8
+#define NOTE_LENGTH 10
 #define REST_TIME 20
-#define RIMSHOT_THRESH 200
+#define RIMSHOT_THRESH 500
 
 using namespace std;
 
@@ -41,7 +41,7 @@ private:
     double MaxVal = 0;  // used for calculating velocity.
     double MaxValRim = 0;
     PiezoSensor sensor;
-    double SensorReading = 0;
+    double SensorReading = 0;  // stores the most recent sensor reading
     int Note = 40;
     int NoteRim = 41;
     int PlayNoteNumber;

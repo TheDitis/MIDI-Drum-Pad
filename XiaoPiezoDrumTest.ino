@@ -32,5 +32,5 @@ void setup() {
 
 void loop() {
     drum.RunCycle();
-    delay(1);
+//    delay(1);
 }
