@@ -232,7 +232,7 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
     setColor(r, g, b);  // make sure color reaches targets exactly, not almost;
 }
 
-void RGBLED::fadeToNonBlocking(int r, int g, int b, int msDuration) {
+void RGBLED::setFadeTarget(int r, int g, int b, int msDuration) {
     inChange = true;
     fadeStartTime = millis();
     rTarget = r;

@@ -9,7 +9,7 @@ public:
     RGBLED(int rPin, int gPin, int bPin, int anodePin);
     void setColor(int r, int g, int b);
     void fadeTo(int r, int g, int b, int msDuration);
-    void fadeToNonBlocking(int r, int g, int b, int msDuration);
+    void setFadeTarget(int r, int g, int b, int msDuration);
     void setPins(int rPin, int gPin, int bPin);
     void setPins(int rPin, int gPin, int bPin, int anodePin);
     void update();
