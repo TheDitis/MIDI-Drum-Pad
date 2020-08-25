@@ -3,18 +3,14 @@
 #include <Arduino.h>
 #include <functional>
 #include "RunningAverage.h"
+#include "RotaryEncoder.h"
 #include "RGBLED.h"
 #include <Math.h>
-
+using namespace std::placeholders;
 
 XiaoPiezoDrum::XiaoPiezoDrum() {
     Serial.begin(115200);
     triggerBuffer = RunningAverage(200);
-//    Serial.println("MIDI Initialized.");
-//    while( !USBDevice.mounted() ) {
-//        Serial.println("Connecting");
-//        delay(1);
-//    }
 }
 
 XiaoPiezoDrum::XiaoPiezoDrum(int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
@@ -39,7 +35,7 @@ void XiaoPiezoDrum::setNoteOffFunc(const function<void(int, int, int)>& offFunc)
 }
 
 void XiaoPiezoDrum::RunCycle() {
-
+    int turnState;
     SensorReading = sensor.read();  // get the sensor value
 
     // see if conditions are right to send a note
@@ -58,7 +54,16 @@ void XiaoPiezoDrum::RunCycle() {
     else if (resting) DetermineRestingState();
 
     LED.update();
-    SerialPlotStages();
+//    SerialPlotStages();
+    knob.isClicked();
+    turnState = knob.checkPosition();
+//    knob.SerialPlotStates();
+
+    if (turnState >= 0)
+        Note = (turnState == 1) ? Note + 1 : Note - 1;
+//    Serial.print("Note:");
+//    Serial.print(Note);
+//    Serial.print("\t");
 }
 
 void XiaoPiezoDrum::TriggerHit() {
@@ -84,7 +89,6 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
                 1,  // minimum velocity for MIDI note
                 127  // maximum velocity for MIDI note
         );
-//        Serial.printf("velocity %d\n", velocity);
         LED.setFadeTarget(velocity * 2, 255 - (velocity * 2), 255 - (velocity * 2), 30);
         if (comFunctionsSet) sendNoteHandler(PlayNoteNumber, velocity, 1);  // if midi noteOn handler has been provided, call it
         triggerSentTime = millis();  // time noteOn signal was sent, so we can calculate when to send noteOffHandler signal
@@ -130,5 +134,10 @@ void XiaoPiezoDrum::SerialPlotStages() {
     Serial.print("\t");
     Serial.print("value: ");
     Serial.print(SensorReading);
+    Serial.print("\t");
     Serial.println();
+}
+
+void XiaoPiezoDrum::setKnobPins(int pin1, int pin2, int clkPin) {
+    knob = RotaryEncoder(pin1, pin2, clkPin);
 }

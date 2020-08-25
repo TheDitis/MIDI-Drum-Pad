@@ -3,19 +3,19 @@
 #include <Arduino.h>
 //#include <Adafruit_TinyUSB.h>
 #include <functional>
+#include "RotaryEncoder.h"
 #include "Smoothed.h"
 #include "RunningAverage.h"
 #include "RGBLED.h"
 #include "PiezoSensor.h"
 #include "Buffer.h"
 
-
 #define THRESHOLD 20
 #define OFF_THRESH 10
-#define SAMPLE_TIME 8
-#define NOTE_LENGTH 10
+#define SAMPLE_TIME 12
+#define NOTE_LENGTH 20
 #define REST_TIME 20
-#define RIMSHOT_THRESH 500
+#define RIMSHOT_THRESH 400
 
 using namespace std;
 
@@ -33,6 +33,7 @@ public:
     void RunCycle();
     void setNoteOnFunc(const function<void(int, int, int)>& onFunc);
     void setNoteOffFunc(const function<void(int, int, int)>& offFunc);
+    void setKnobPins(int pin1, int pin2, int clkPin);
 //    void setNoteComFunctions();
 
 private:
@@ -55,6 +56,7 @@ private:
     unsigned long triggerSentTime;
     unsigned long noteEndTime;
     RunningAverage triggerBuffer;  // was sampleValues
+    RotaryEncoder knob;
     bool comFunctionsSet = false;
     function<void(int, int, int)> sendNoteHandler;
     function<void(int, int, int)> noteOffHandler;
