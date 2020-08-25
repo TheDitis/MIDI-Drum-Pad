@@ -19,10 +19,8 @@ RotaryEncoder::RotaryEncoder(int pinA, int pinB, int btnPin) {
 }
 
 int RotaryEncoder::checkPosition() {
-    // if knob is being turned:
-    bool wasTurned = false;
     bool sameDirection;
-    bool moving;
+    bool moving;  // temporary value determining whether or not the knob is being turned this loop.
     // read encoder pins:
     p1Val = digitalRead(pin1);
     p2Val = digitalRead(pin2);
@@ -34,7 +32,6 @@ int RotaryEncoder::checkPosition() {
         turnInfo = p1Val < p2Val ? 0 : 1;
         sameDirection = direction == turnInfo;  // if this turn is in the same direction as the last
         direction = turnInfo;  // set direction to that determined
-        wasTurned = true;
     }
     else turnInfo = -1;
     isMoving = moving;

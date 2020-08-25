@@ -5,11 +5,10 @@
 #ifndef XIAOPIEZODRUM_PIEZOSENSOR_H
 #define XIAOPIEZODRUM_PIEZOSENSOR_H
 #include "Smoothed.h"
-#include "Buffer.h"
 
 
 #define SMOOTH_AMT 100
-#define OFFSET -6
+#define OFFSET (-10)  // to offset the resting level of the sensor so that it sits at 0
 
 class PiezoSensor {
 public:

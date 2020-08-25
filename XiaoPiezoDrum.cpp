@@ -9,8 +9,8 @@
 using namespace std::placeholders;
 
 XiaoPiezoDrum::XiaoPiezoDrum() {
-    Serial.begin(115200);
-    triggerBuffer = RunningAverage(200);
+    Serial.begin(115200);  // start serial
+    triggerBuffer = RunningAverage(200);  // initialize the buffer that we will use to collect velocity data once the threshold is crossed
 }
 
 XiaoPiezoDrum::XiaoPiezoDrum(int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
@@ -18,9 +18,9 @@ XiaoPiezoDrum::XiaoPiezoDrum(int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
 }
 
 XiaoPiezoDrum::XiaoPiezoDrum(int piezoPin, int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
-    LED = RGBLED(rPin, gPin, bPin, -1);
-    LED.fadeTo(0, 255, 255, 1000);
-    sensor = PiezoSensor(piezoPin, 10);
+    LED = RGBLED(rPin, gPin, bPin, -1);  // initialize RGBLED, passing -1 to indicate that we are using a common anode LED
+    LED.setFadeTarget(0, 255, 255, 1000);  // fade to the default blueish color
+    sensor = PiezoSensor(piezoPin, 10);  // setup the Piezo sensor
 }
 
 
@@ -54,16 +54,21 @@ void XiaoPiezoDrum::RunCycle() {
     else if (resting) DetermineRestingState();
 
     LED.update();
-//    SerialPlotStages();
+    SerialPlotStages();
     knob.isClicked();
     turnState = knob.checkPosition();
 //    knob.SerialPlotStates();
 
-    if (turnState >= 0)
-        Note = (turnState == 1) ? Note + 1 : Note - 1;
-//    Serial.print("Note:");
-//    Serial.print(Note);
-//    Serial.print("\t");
+    // if the knob was turned this loop:
+    if (turnState >= 0) {
+        // if we are not in the mode to change the rimshot note:
+        if (!changeRimshotNote) {
+            // change the primary note number by one
+            Note += (turnState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
+        }
+        // if we are in the mode to change the rimshot note:
+        else NoteRim += (turnState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
+    }
 }
 
 void XiaoPiezoDrum::TriggerHit() {
@@ -89,7 +94,7 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
                 1,  // minimum velocity for MIDI note
                 127  // maximum velocity for MIDI note
         );
-        LED.setFadeTarget(velocity * 2, 255 - (velocity * 2), 255 - (velocity * 2), 30);
+        if (homeScreen) LED.setFadeTarget(velocity * 2, 255 - (velocity * 2), 255 - (velocity * 2), 30);  // trigger led color change if you aren't in a menu
         if (comFunctionsSet) sendNoteHandler(PlayNoteNumber, velocity, 1);  // if midi noteOn handler has been provided, call it
         triggerSentTime = millis();  // time noteOn signal was sent, so we can calculate when to send noteOffHandler signal
         triggerStartTime = 0;
@@ -101,11 +106,11 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
 void XiaoPiezoDrum::NoteOffCountdown() {
     // if the specified note length has passed:
     if (millis() - triggerSentTime >= NOTE_LENGTH) {
-        LED.setFadeTarget(0, 255, 255, 100);
+        if (homeScreen) LED.setFadeTarget(0, 255, 255, 100);  // return to default color if not in a menu
         if (comFunctionsSet) noteOffHandler(PlayNoteNumber, 0, 1);  // run noteOffHandler MIDI handler if it has been provided
         triggered = false;  //  signify that we have sent noteOffHandler signal
         resting = true;  // signify that we just finished sending a note and will wait REST_TIME ms before the next
-        noteEndTime = millis();  // signify time noteOffHandler signal was sent to calculate when we can send again
+        noteEndTime = millis();  // time noteOffHandler signal was sent to calculate when we can send again
     }
 }
 

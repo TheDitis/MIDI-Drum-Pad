@@ -5,7 +5,7 @@
 #include <Adafruit_USBD_MIDI.h>
 #include "XiaoPiezoDrum.h"
 
-#define DEBUG false
+#define DEBUG true  // runs the loop at a max of once per ms so that serial platter is easier to read
 int timeInterval = 5;
 int prevMs = 0;
 
@@ -18,9 +18,11 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
 
 void sendNoteOn(int note, int velocity, int chan) {
     MIDI.sendNoteOn(note, velocity, chan);
+    Serial.println();
 };
 void sendNoteOff(int note, int velocity, int chan) {
     MIDI.sendNoteOff(note, velocity, chan);
+    Serial.println();
 };
 
 XiaoPiezoDrum drum(0,  1, 2, 3);
