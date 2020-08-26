@@ -7,19 +7,22 @@
 
 
 RotaryEncoder::RotaryEncoder(int pinA, int pinB, int btnPin) {
+    // assign pins:
     pin1 = pinA;
     pin2 = pinB;
     clkPin = btnPin;
+    // set all pins to inputs:
     pinMode(pin1, INPUT);
     pinMode(pin2, INPUT);
     pinMode(clkPin, INPUT);
+    // write to high to remove signal noise:
     digitalWrite(pin1, HIGH);
     digitalWrite(pin2, HIGH);
     digitalWrite(clkPin, HIGH);
 }
 
 int RotaryEncoder::checkPosition() {
-    bool sameDirection;
+    bool sameDirection;  // NOT YET USED
     bool moving;  // temporary value determining whether or not the knob is being turned this loop.
     // read encoder pins:
     p1Val = digitalRead(pin1);
@@ -33,17 +36,19 @@ int RotaryEncoder::checkPosition() {
         sameDirection = direction == turnInfo;  // if this turn is in the same direction as the last
         direction = turnInfo;  // set direction to that determined
     }
-    else turnInfo = -1;
-    isMoving = moving;
-    return turnInfo;
+    // Otherwise, (if either the knob is not in motion, or it is and the signal has already been registered):
+    else turnInfo = -1;  // reset turnInfo to -1, indicating no turn
+    isMoving = moving;  // assign isMoving to moving so that comparison can be made next loop
+    return turnInfo;  // return turnInfo (no turn: -1, left: 0, right: 1)
 }
 
 bool RotaryEncoder::isClicked() {
-    btnDown = digitalRead(clkPin);
-    return btnDown;
+    btnDown = digitalRead(clkPin);  // read the pin connected to the button of the encoder
+    return !btnDown;  // return the inverse, since the value is low when the button is pressed
 }
 
 void RotaryEncoder::SerialPlotStates() {
+    // print all important values with their labels, output in proper format for arduino serial plotter
     Serial.print("direction:");
     Serial.print(direction);
     Serial.print("\t");
@@ -53,9 +58,9 @@ void RotaryEncoder::SerialPlotStates() {
     Serial.print("two:");
     Serial.print(p2Val);
     Serial.print("\t");
-//    Serial.print("clk: ");
-//    Serial.print(btnDown);
-//    Serial.print("\t");
+    Serial.print("clk: ");
+    Serial.print(btnDown);
+    Serial.print("\t");
     Serial.println();
     Serial.println();
 }

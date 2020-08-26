@@ -11,19 +11,18 @@ PiezoSensor::PiezoSensor() {
 }
 
 PiezoSensor::PiezoSensor(int sensorPin) {
-    PinNumber = sensorPin;
-    pinMode(PinNumber, OUTPUT);
+    PinNumber = sensorPin;  // assign pin number
+    pinMode(PinNumber, INPUT);  // set pin to input
 }
 
 PiezoSensor::PiezoSensor(int sensorPin, int smoothAmount) {
-    PinNumber = sensorPin;
-    pinMode(PinNumber, OUTPUT);
-//    buffer = Buffer(100, smoothAmount);
-    buffer.begin(SMOOTHED_EXPONENTIAL, smoothAmount);
+    PinNumber = sensorPin;  // assign pin number
+    pinMode(PinNumber, INPUT);  // set pin to input
+    buffer.begin(SMOOTHED_EXPONENTIAL, smoothAmount);  // set the smoothing parameters for the buffer
 }
 
 double PiezoSensor::read() {
-    double val = analogRead(PinNumber);
-    buffer.add(val + OFFSET);
-    return buffer.get();
+    double val = analogRead(PinNumber);  // get the latest value from the sensor
+    buffer.add(val + OFFSET);  // add it to the buffer, correcting for the offset
+    return buffer.get();  // return the smoothed value
 }

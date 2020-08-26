@@ -52,22 +52,11 @@ RGBLED::RGBLED(int rPin, int gPin, int bPin, int anodePin) {
 }
 
 void RGBLED::setColor(int r, int g, int b) {
-    // set color attributes to given values
+    // set color attributes to passed values:
     red = r;
     green = g;
     blue = b;
-
-    // if the LED is common anode, invert the values
-    if (commonAnode) {
-        r = 255 - r;
-        g = 255 - g;
-        b = 255 - b;
-    }
-
-    // output color values to corresponding pins
-    analogWrite(redPin, r);
-    analogWrite(greenPin, g);
-    analogWrite(bluePin, b);
+    changeLEDColor();  // output the values to the assigned pins
 }
 
 void RGBLED::setPins(int rPin, int gPin, int bPin) {
@@ -228,54 +217,69 @@ void RGBLED::fadeTo(int r, int g, int b, int msDuration) {
 }
 
 void RGBLED::setFadeTarget(int r, int g, int b, int msDuration) {
+    // if a fade was already in progress, end it before starting a new one
     if (inChange) {
         endFade();
-//        bool onHit = rTarget != 0 && gTarget != 255 && bTarget != 255;
-//        Serial.printf("FadeNotCompleted. Onhit: %d\n", onHit);
     }
-    inChange = true;
-    fadeStartTime = millis();
+    inChange = true;  // signify that a fade is taking place
+    fadeStartTime = millis();  // set the time that this fade started
+    // set the starting values to the current values of the LED:
     rStart = red;
     gStart = green;
     bStart = blue;
+    // set the targets for each color to those given:
     rTarget = r;
     gTarget = g;
     bTarget = b;
-    fadeDuration = msDuration;
-//    Serial.printf("starts red %d green %d blue %d\n", rStart, gStart, bStart);
-//    Serial.printf("targets red %d green %d blue %d\n", rTarget, gTarget, bTarget);
+    fadeDuration = msDuration;  // set the fade duration variable to that given
 }
 
 void RGBLED::update() {
-
+    // if there is a color target set that hasn't yet been met:
     if (inChange) {
-        int rVal, gVal, bVal;
-        int timeInFade = millis() - fadeStartTime;
+        int timeInFade = millis() - fadeStartTime;  // get the time the fade began
+        // if the time since the fade started is greater than the desired duration, end the fade:
         if (timeInFade > fadeDuration) endFade();
+        // if we are still within the fade duration timeframe:
         else {
+            // get the color values, which are somewhere in between start and target values for that color, weighted proportionally to the percentage of the fadeDuration that has passed
             red = map(timeInFade, 0, fadeDuration, rStart, rTarget);
             green = map(timeInFade, 0, fadeDuration, gStart, gTarget);
             blue = map(timeInFade, 0, fadeDuration, bStart, bTarget);
-//            Serial.printf("red %d green %d blue %d\n\n", red, green, blue);
-            setColor(red, green, blue);
+            changeLEDColor();  // output the newly calculated values to assigned output pins
         }
     }
 }
 
+void RGBLED::changeLEDColor() {
+    // assign each color to a temp variable
+    int r = red;
+    int g = green;
+    int b = blue;
+    // if the LED is common anode, invert the values:
+    if (commonAnode) {
+        r = 255 - r;
+        g = 255 - g;
+        b = 255 - b;
+    }
+    // output color values to corresponding pins:
+    analogWrite(redPin, r);
+    analogWrite(greenPin, g);
+    analogWrite(bluePin, b);
+}
+
 void RGBLED::endFade() {
-    setColor(rTarget, gTarget, bTarget);  // making sure we reached the target exactly;
-    inChange = false;
-    fadeStartTime = 0;
-    fadeDuration = 0;
+    setColor(rTarget, gTarget, bTarget);  // making sure we reached the target exactly
+    inChange = false;  // signify that we are no longer in a fade
+    fadeStartTime = 0;  // reset the time the fade started
+    fadeDuration = 0;  // reset the desired duration of the fade
+    // set both start and target value of each color to the current color:
     rStart = red;
     gStart = green;
     bStart = blue;
     rTarget = red;
     gTarget = green;
     bTarget = blue;
-//    rDiff = 0;
-//    gDiff = 0;
-//    bDiff = 0;
 }
 
 

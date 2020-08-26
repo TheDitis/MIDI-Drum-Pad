@@ -7,7 +7,7 @@
 #include "Smoothed.h"
 
 
-#define SMOOTH_AMT 100
+#define SMOOTH_AMT 100  // NOT CURRENTLY USED
 #define OFFSET (-10)  // to offset the resting level of the sensor so that it sits at 0
 
 class PiezoSensor {
@@ -15,14 +15,11 @@ public:
     PiezoSensor();
     explicit PiezoSensor(int sensorPin);
     PiezoSensor(int sensorPin, int smoothAmount);
-    double read();
+    double read(); // gets smoothed value
 
 private:
-    int PinNumber = -1;
-    Smoothed<double> buffer;
-//    SmoothedValues.begin(SMOOTHED_AVERAGE, smoothAmount);
-//    RunningAverage sampleValues;
-
+    unsigned int PinNumber;  // pin number of the piezo sensor on the board
+    Smoothed<double> buffer;  // declare smoothing buffer
 };
 
 

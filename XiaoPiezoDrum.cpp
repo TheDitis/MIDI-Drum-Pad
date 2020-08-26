@@ -5,12 +5,14 @@
 #include "RunningAverage.h"
 #include "RotaryEncoder.h"
 #include "RGBLED.h"
+#include "Display.h"
 #include <Math.h>
-using namespace std::placeholders;
 
 XiaoPiezoDrum::XiaoPiezoDrum() {
     Serial.begin(115200);  // start serial
     triggerBuffer = RunningAverage(200);  // initialize the buffer that we will use to collect velocity data once the threshold is crossed
+//    display = Display();
+//    screen.HomeScreen();
 }
 
 XiaoPiezoDrum::XiaoPiezoDrum(int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
@@ -21,6 +23,7 @@ XiaoPiezoDrum::XiaoPiezoDrum(int piezoPin, int rPin, int gPin, int bPin) : XiaoP
     LED = RGBLED(rPin, gPin, bPin, -1);  // initialize RGBLED, passing -1 to indicate that we are using a common anode LED
     LED.setFadeTarget(0, 255, 255, 1000);  // fade to the default blueish color
     sensor = PiezoSensor(piezoPin, 10);  // setup the Piezo sensor
+
 }
 
 
@@ -87,6 +90,7 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
         PlayNoteNumber = rimshot ? NoteRim : Note;
         MaxVal = (!rimshot && triggerMax > MaxVal) ? triggerMax : MaxVal;  // if the value is greater than the current max, replace it
         MaxValRim = (rimshot && triggerMax > MaxValRim) ? triggerMax : MaxValRim;  // replace rimshot maxval if current val is greater
+        // calculate velocity:
         int velocity = map(
                 triggerMax, // the maximum value in the samples gathered from this strike
                 rimshot ? RIMSHOT_THRESH : THRESHOLD,  // if it's a rimshot, the floor should be the threshold, 0 otherwise
@@ -123,11 +127,13 @@ void XiaoPiezoDrum::DetermineRestingState() {
 }
 
 void XiaoPiezoDrum::SerialPlotStages() {
-    int isTriggering, isTriggered, isResting;
+    int isTriggering, isTriggered, isResting;  // used to plot different stages
+    // assign to high value if we are currently in that stage
     isTriggering = triggering ? 200 : 0;
-    isTriggered = triggered ? 220 : 0;
+    isTriggered = triggered ? 220 : 0;  // using a different value to make boundaries between stages more clear
     isResting = resting ? 200 : 0;
 
+    // print out values with labels in proper format for arduino serial plotter:
     Serial.print("triggering: ");
     Serial.print(isTriggering);
     Serial.print("\t");
@@ -144,5 +150,12 @@ void XiaoPiezoDrum::SerialPlotStages() {
 }
 
 void XiaoPiezoDrum::setKnobPins(int pin1, int pin2, int clkPin) {
-    knob = RotaryEncoder(pin1, pin2, clkPin);
+    knob = RotaryEncoder(pin1, pin2, clkPin);  // initialize the rotary encoder
+}
+
+void XiaoPiezoDrum::initDisplay() {
+    display.init();  // start up the screen
+    display.setNoteNum1(Note);  // pass the current note
+    display.setNoteNum2(NoteRim);
+    display.HomeScreen();
 }

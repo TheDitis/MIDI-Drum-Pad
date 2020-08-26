@@ -5,6 +5,14 @@
 #include <Adafruit_USBD_MIDI.h>
 #include "XiaoPiezoDrum.h"
 
+#include "Display.h"
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+
+
 #define DEBUG true  // runs the loop at a max of once per ms so that serial platter is easier to read
 int timeInterval = 5;
 int prevMs = 0;
@@ -34,7 +42,8 @@ void setup() {
     MIDI.begin(MIDI_CHANNEL_OMNI);
     drum.setNoteOnFunc(sendNoteOn);
     drum.setNoteOffFunc(sendNoteOff);
-    drum.setKnobPins(6, 5, 4);
+    drum.setKnobPins(8, 9, 10);
+    drum.initDisplay();
 }
 
 void loop() {
