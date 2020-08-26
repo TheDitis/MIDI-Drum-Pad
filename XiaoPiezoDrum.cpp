@@ -68,9 +68,15 @@ void XiaoPiezoDrum::RunCycle() {
         if (!changeRimshotNote) {
             // change the primary note number by one
             Note += (turnState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
+            display.setNote1(Note);
+            display.HomeScreen();
         }
         // if we are in the mode to change the rimshot note:
-        else NoteRim += (turnState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
+        else {
+            NoteRim += (turnState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
+            display.setNote2(NoteRim);
+            display.HomeScreen();
+        }
     }
 }
 
@@ -155,7 +161,10 @@ void XiaoPiezoDrum::setKnobPins(int pin1, int pin2, int clkPin) {
 
 void XiaoPiezoDrum::initDisplay() {
     display.init();  // start up the screen
-    display.setNoteNum1(Note);  // pass the current note
-    display.setNoteNum2(NoteRim);
-    display.HomeScreen();
+
+    // pass the current note values:
+    display.setNote1(Note);
+    display.setNote2(NoteRim);
+
+    display.HomeScreen();// display the home screen
 }
