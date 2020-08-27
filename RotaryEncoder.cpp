@@ -42,9 +42,13 @@ int RotaryEncoder::checkPosition() {
     return turnInfo;  // return turnInfo (no turn: -1, left: 0, right: 1)
 }
 
-bool RotaryEncoder::isClicked() {
-    btnDown = digitalRead(clkPin);  // read the pin connected to the button of the encoder
-    return !btnDown;  // return the inverse, since the value is low when the button is pressed
+bool RotaryEncoder::wasClicked() {
+    bool buttonDown = digitalRead(clkPin);  // read the pin connected to the button of the encoder
+    buttonDown = !buttonDown;  // invert buttonDown, since its a normally closed switch
+    bool wasClicked = false;  // set wasClicked to false by default
+    if (!btnDown && buttonDown) wasClicked = true;  // if the button was not down last loop but was this one, set wasClicked to true
+    btnDown = buttonDown;  // set btnDown attribute to the temporary one so that the comparison can be made next loop
+    return wasClicked;  // return true if there was a click event
 }
 
 void RotaryEncoder::SerialPlotStates() {

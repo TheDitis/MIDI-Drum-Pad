@@ -14,7 +14,7 @@ public:
     RotaryEncoder(int pinA, int pinB);
     RotaryEncoder(int pinA, int pinB, int btnPin);
     int checkPosition();  // see if the knob was turned and get the direction if so (left: 0, right: 1, no turn: -1)
-    bool isClicked();  // true if the button is down
+    bool wasClicked();  // true if the button is down
     void SerialPlotStates();  // Plot the signals from the knob, along with the direction for debugging
 
 private:

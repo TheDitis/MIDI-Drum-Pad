@@ -9,6 +9,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define NUM_HOMESCREEN_ITEMS 3
 #define NOTES_IN_OCTAVE 12
 #define CHAR_WIDTH_MED 15
 
@@ -36,6 +37,9 @@ public:
     String numberToNote(int number);
     void setNote1(int noteNum) { noteNum1 = noteNum;}
     void setNote2(int noteNum) { noteNum2 = noteNum;}
+    int getHomeScreenSelection();
+    void setHomeScreenSelection(int itemNum);
+    void setEditingValue(bool isEditing) {editingValue = isEditing;}
 
 private:
     Adafruit_SSD1306 display;  // Adafruit display object that we will use to write values to the screen
@@ -44,13 +48,12 @@ private:
     int noteNum2XLoc = 55;
     int settingsIconXLoc = 105;
     String NOTES[NOTES_IN_OCTAVE] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};  // possible note options
-    int OCTAVES[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};  // octaves that work with midi
-    int homeScreenSelection = 0;  // this will determine which item is selected for editing
-    int settingsSelection = 0;
-    int homeMenuItemLocations[3] = {noteNum1XLoc, noteNum2XLoc, settingsIconXLoc};
+    int OCTAVES[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};  // octaves that work with midi
+    int homeScreenSelection = 0;  // this will determine which item is selected when we are in the home menu
+    int settingsSelection = 0;  // this will determine which item is selected when we are in the settings menu
+    int homeMenuItemLocations[NUM_HOMESCREEN_ITEMS] = {noteNum1XLoc, noteNum2XLoc, settingsIconXLoc};  // list of locations for home menu items, used to place the selection rectangle
     int getHomeMenuItemWidth(int index);
-    // 'gearicon', 12x12px
-
+    bool editingValue = false;  // set to true when a value should be being changed
 
 };
 

@@ -42,7 +42,6 @@ private:
     function<void(int, int, int)> sendNoteHandler;  // blank noteOn handler to be assigned to your midi protocol handler using setNoteOnFunc method
     function<void(int, int, int)> noteOffHandler;  // blank noteOff handler to be assigned to your midi protocol handler using setNoteOffFunc method
     double SensorReading = 0;  // stores the most recent sensor reading
-    bool homeScreen = true; // true if you are not in a menu
     double MaxVal = 0;  // used for calculating velocity of plain hits
     double MaxValRim = 0;  // used for calculating velocity of rimshots
     int Note = 40;  // note sent when the peak sensor value collected during triggering stage is below RIMSHOT_THRESH
@@ -64,6 +63,19 @@ private:
     void NoteOffCountdown();  // method that starts being called each loop once note is sent, and counts down NOTE_LENGTH ms, before sending noteOff signal
     void DetermineRestingState();  // method starts being called each loop after noteOff signall is sent, until REST_TIME ms has passed, at which point it sets parameters such that a new note can be sent
     void SerialPlotStages();  // used for debugging using the arduino serial plotter. It plots the sensor readings, along with signifiers of when each of the stages (triggering, triggered, and resting)
+    int knobState = -1;  // assigned every loop with the knob's checkPosition method. no turn: -1, left: 0, right: 1
+    int btnClicked = false;  // assigned with the knob's wasClicked method every loop;
+
+    bool onHomeScreen = true; // true if you are not in a menu
+    bool onSettingsScreen = !onHomeScreen; // true if you are in the menu. Mutually exclusive to onHomeScreen
+    void toggleSettingsScreen() {onHomeScreen = !onHomeScreen; onSettingsScreen = !onSettingsScreen;}  // to switch back and forth between the Home and Settings screens
+    bool menuScrolling = true;  // true when knob turns should move the menu selection cursor rather than change values
+    bool changeMenuValue = !menuScrolling;  // true when you should be changing values in the menu. Mutually exclusive to menuScrolling
+    void toggleMenuSelect() {menuScrolling = !menuScrolling; changeMenuValue = !changeMenuValue;}  // method to switch between menu item selection and value editing
+    void handleKnobTurn();  // determines what happens when the knob is turned
+    void handleButtonClick();  // run any time the rotary encoder knob is pressed.
+    int homeScreenSelection = 0;  // this will determine which item is selected when we are in the home menu
+    int settingsSelection = 0;  // this will determine which item is selected when we are in the settings menu
 };
 
 #endif //XIAOPIEZODRUM_XIAOPIEZODRUM_H

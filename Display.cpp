@@ -16,14 +16,16 @@ void Display::HomeScreen() {
     // Display Text
     display.setTextSize(2);
     display.setTextColor(WHITE);
-//    display.setCursor(0,0);
-//    display.println("Hello world!");
 
-    // print first note number to the screen:
+    if (editingValue) display.fillRoundRect(homeMenuItemLocations[homeScreenSelection] - 5, 0, getHomeMenuItemWidth(homeScreenSelection), 26, 9, WHITE);
+    else display.drawRoundRect(homeMenuItemLocations[homeScreenSelection] - 5, 0, getHomeMenuItemWidth(homeScreenSelection), 26, 9, WHITE);
+
+    display.setTextColor(editingValue && homeScreenSelection == 0 ? BLACK : WHITE);
     display.setCursor(noteNum1XLoc, 6);
     String note1 = numberToNote(noteNum1);
     display.print(note1);
 
+    display.setTextColor(editingValue && homeScreenSelection == 1 ? BLACK : WHITE);
     // print the second note number the screen:
     display.setCursor(noteNum2XLoc, 6);
     String note2 = numberToNote(noteNum2);
@@ -33,7 +35,7 @@ void Display::HomeScreen() {
 
     int underlineLocX = homeScreenSelection == 0 ? noteNum1XLoc : noteNum2XLoc;
 //    display.drawLine(underlineLocX - 5, 28, underlineLocX + 20, 28, WHITE);
-    display.drawRoundRect(noteNum1XLoc - 5, 3, 15 * note1.length(), 22, 5, WHITE);
+
 
 
     display.display();  // send to screen
@@ -57,19 +59,27 @@ String Display::numberToNote(int number) {
 }
 
 int Display::getHomeMenuItemWidth(int index) {
-//    int width;
-//    if (index == 0) {
-//        width = numberToNote(noteNum1).length() * CHAR_WIDTH_MED;
-//    }
     switch (index) {
         case 0:
             return numberToNote(noteNum1).length() * CHAR_WIDTH_MED;
         case 1:
             return numberToNote(noteNum2).length() * CHAR_WIDTH_MED;
-        case 3:
-            return 20;
+        case 2:
+            return 27;
         default:
-            Serial.println("ERROR: Index out of range in getHomeMenuItemWidth method of Display class")
-
+            Serial.println("ERROR: Index out of range in getHomeMenuItemWidth method of Display class");
+            break;
     }
+}
+
+int Display::getHomeScreenSelection() {
+    return homeScreenSelection;
+}
+
+void Display::setHomeScreenSelection(int itemNum) {
+//    if (itemNum < 0) itemNum = NUM_HOMESCREEN_ITEMS - itemNum;
+//    homeScreenSelection = itemNum % NUM_HOMESCREEN_ITEMS;  // make sure we are in range
+//    Serial.println(homeScreenSelection);
+//    return homeScreenSelection;
+    homeScreenSelection = itemNum;
 }

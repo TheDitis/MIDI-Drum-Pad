@@ -38,7 +38,6 @@ void XiaoPiezoDrum::setNoteOffFunc(const function<void(int, int, int)>& offFunc)
 }
 
 void XiaoPiezoDrum::RunCycle() {
-    int turnState;
     SensorReading = sensor.read();  // get the sensor value
 
     // see if conditions are right to send a note
@@ -57,27 +56,30 @@ void XiaoPiezoDrum::RunCycle() {
     else if (resting) DetermineRestingState();
 
     LED.update();
-    SerialPlotStages();
-    knob.isClicked();
-    turnState = knob.checkPosition();
+//    SerialPlotStages();
+    btnClicked = knob.wasClicked();
+    knobState = knob.checkPosition();
 //    knob.SerialPlotStates();
 
-    // if the knob was turned this loop:
-    if (turnState >= 0) {
-        // if we are not in the mode to change the rimshot note:
-        if (!changeRimshotNote) {
-            // change the primary note number by one
-            Note += (turnState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
-            display.setNote1(Note);
-            display.HomeScreen();
-        }
-        // if we are in the mode to change the rimshot note:
-        else {
-            NoteRim += (turnState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
-            display.setNote2(NoteRim);
-            display.HomeScreen();
-        }
-    }
+    if (btnClicked) handleButtonClick();
+    // if the knob was turned in either direction, call handleKnobTurn passing in the direction indicator:
+    if (knobState >= 0) handleKnobTurn();
+//    // if the knob was turned this loop:
+//    if (knobState >= 0) {
+//        // if we are not in the mode to change the rimshot note:
+//        if (!changeRimshotNote) {
+//            // change the primary note number by one
+//            Note += (knobState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
+//            display.setNote1(Note);
+//            display.HomeScreen();
+//        }
+//        // if we are in the mode to change the rimshot note:
+//        else {
+//            NoteRim += (knobState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
+//            display.setNote2(NoteRim);
+//            display.HomeScreen();
+//        }
+//    }
 }
 
 void XiaoPiezoDrum::TriggerHit() {
@@ -104,7 +106,7 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
                 1,  // minimum velocity for MIDI note
                 127  // maximum velocity for MIDI note
         );
-        if (homeScreen) LED.setFadeTarget(velocity * 2, 255 - (velocity * 2), 255 - (velocity * 2), 30);  // trigger led color change if you aren't in a menu
+        if (onHomeScreen) LED.setFadeTarget(velocity * 2, 255 - (velocity * 2), 255 - (velocity * 2), 30);  // trigger led color change if you aren't in a menu
         if (comFunctionsSet) sendNoteHandler(PlayNoteNumber, velocity, 1);  // if midi noteOn handler has been provided, call it
         triggerSentTime = millis();  // time noteOn signal was sent, so we can calculate when to send noteOffHandler signal
         triggerStartTime = 0;
@@ -116,7 +118,7 @@ void XiaoPiezoDrum::CalculateAndSendNote() {
 void XiaoPiezoDrum::NoteOffCountdown() {
     // if the specified note length has passed:
     if (millis() - triggerSentTime >= NOTE_LENGTH) {
-        if (homeScreen) LED.setFadeTarget(0, 255, 255, 100);  // return to default color if not in a menu
+        if (onHomeScreen) LED.setFadeTarget(0, 255, 255, 100);  // return to default color if not in a menu
         if (comFunctionsSet) noteOffHandler(PlayNoteNumber, 0, 1);  // run noteOffHandler MIDI handler if it has been provided
         triggered = false;  //  signify that we have sent noteOffHandler signal
         resting = true;  // signify that we just finished sending a note and will wait REST_TIME ms before the next
@@ -167,4 +169,48 @@ void XiaoPiezoDrum::initDisplay() {
     display.setNote2(NoteRim);
 
     display.HomeScreen();// display the home screen
+}
+
+void XiaoPiezoDrum::handleKnobTurn() {
+    // if we are in selection mode rather than value editing mode
+    if (menuScrolling) {
+        if (onHomeScreen) {
+            int itemSelected = homeScreenSelection + ((knobState == 0) ? -1 : 1);
+            if (itemSelected < 0) itemSelected = NUM_HOMESCREEN_ITEMS - 1;
+            homeScreenSelection = itemSelected % NUM_HOMESCREEN_ITEMS;
+            display.setHomeScreenSelection(homeScreenSelection);
+        }
+        else if (onSettingsScreen) {
+
+        }
+    }
+    else if (changeMenuValue) {
+        if (onHomeScreen) {
+            changeRimshotNote = (homeScreenSelection == 1) ? true : false;
+            // if we are not in the mode to change the rimshot note:
+            if (!changeRimshotNote) {
+                // change the primary note number by one
+                Note += (knobState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
+                display.setNote1(Note);
+            }
+                // if we are in the mode to change the rimshot note:
+            else {
+                NoteRim += (knobState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
+                display.setNote2(NoteRim);
+            }
+        }
+    }
+    if (onHomeScreen) display.HomeScreen();
+
+}
+
+void XiaoPiezoDrum::handleButtonClick() {
+    if (onHomeScreen) {
+        if (homeScreenSelection != NUM_HOMESCREEN_ITEMS - 1) {
+            toggleMenuSelect();
+            display.setEditingValue(changeMenuValue);
+        }
+        else toggleSettingsScreen();
+        display.HomeScreen();
+    }
 }
