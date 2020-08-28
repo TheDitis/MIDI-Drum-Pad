@@ -33,6 +33,7 @@ class Display {
 public:
     Display();
     void HomeScreen();  // the method that displays the homescreen
+    void SettingsScreen();
     void init();
     String numberToNote(int number);
     void setNote1(int noteNum) { noteNum1 = noteNum;}
@@ -48,12 +49,13 @@ private:
     int noteNum2XLoc = 55;
     int settingsIconXLoc = 105;
     String NOTES[NOTES_IN_OCTAVE] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};  // possible note options
-    int OCTAVES[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};  // octaves that work with midi
+    int OCTAVES[11] = {2, 3, 4, 5, 6, 7, 8, 9};  // octaves that work with midi
     int homeScreenSelection = 0;  // this will determine which item is selected when we are in the home menu
     int settingsSelection = 0;  // this will determine which item is selected when we are in the settings menu
     int homeMenuItemLocations[NUM_HOMESCREEN_ITEMS] = {noteNum1XLoc, noteNum2XLoc, settingsIconXLoc};  // list of locations for home menu items, used to place the selection rectangle
     int getHomeMenuItemWidth(int index);
     bool editingValue = false;  // set to true when a value should be being changed
+    void drawSelectionArrow(int x, int y);
 
 };
 

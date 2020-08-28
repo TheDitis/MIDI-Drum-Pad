@@ -12,12 +12,12 @@ PiezoSensor::PiezoSensor() {
 
 PiezoSensor::PiezoSensor(int sensorPin) {
     PinNumber = sensorPin;  // assign pin number
-    pinMode(PinNumber, INPUT);  // set pin to input
+    pinMode(PinNumber, INPUT_PULLUP);  // set pin to input
 }
 
 PiezoSensor::PiezoSensor(int sensorPin, int smoothAmount) {
     PinNumber = sensorPin;  // assign pin number
-    pinMode(PinNumber, INPUT);  // set pin to input
+    pinMode(PinNumber, INPUT_PULLUP);  // set pin to input
     buffer.begin(SMOOTHED_EXPONENTIAL, smoothAmount);  // set the smoothing parameters for the buffer
 }
 

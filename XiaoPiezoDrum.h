@@ -68,7 +68,7 @@ private:
 
     bool onHomeScreen = true; // true if you are not in a menu
     bool onSettingsScreen = !onHomeScreen; // true if you are in the menu. Mutually exclusive to onHomeScreen
-    void toggleSettingsScreen() {onHomeScreen = !onHomeScreen; onSettingsScreen = !onSettingsScreen;}  // to switch back and forth between the Home and Settings screens
+    void toggleSettingsScreen();
     bool menuScrolling = true;  // true when knob turns should move the menu selection cursor rather than change values
     bool changeMenuValue = !menuScrolling;  // true when you should be changing values in the menu. Mutually exclusive to menuScrolling
     void toggleMenuSelect() {menuScrolling = !menuScrolling; changeMenuValue = !changeMenuValue;}  // method to switch between menu item selection and value editing

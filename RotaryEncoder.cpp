@@ -12,9 +12,9 @@ RotaryEncoder::RotaryEncoder(int pinA, int pinB, int btnPin) {
     pin2 = pinB;
     clkPin = btnPin;
     // set all pins to inputs:
-    pinMode(pin1, INPUT);
-    pinMode(pin2, INPUT);
-    pinMode(clkPin, INPUT);
+    pinMode(pin1, INPUT_PULLUP);
+    pinMode(pin2, INPUT_PULLUP);
+    pinMode(clkPin, INPUT_PULLUP);
     // write to high to remove signal noise:
     digitalWrite(pin1, HIGH);
     digitalWrite(pin2, HIGH);

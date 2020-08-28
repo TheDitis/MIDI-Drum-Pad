@@ -11,8 +11,6 @@
 XiaoPiezoDrum::XiaoPiezoDrum() {
     Serial.begin(115200);  // start serial
     triggerBuffer = RunningAverage(200);  // initialize the buffer that we will use to collect velocity data once the threshold is crossed
-//    display = Display();
-//    screen.HomeScreen();
 }
 
 XiaoPiezoDrum::XiaoPiezoDrum(int rPin, int gPin, int bPin) : XiaoPiezoDrum() {
@@ -40,6 +38,17 @@ void XiaoPiezoDrum::setNoteOffFunc(const function<void(int, int, int)>& offFunc)
 void XiaoPiezoDrum::RunCycle() {
     SensorReading = sensor.read();  // get the sensor value
 
+
+    btnClicked = knob.wasClicked();
+    knobState = knob.checkPosition();
+    //knob.SerialPlotStates();
+
+    if (btnClicked) handleButtonClick();
+    // if the knob was turned in either direction, call handleKnobTurn passing in the direction indicator:
+    if (knobState >= 0) handleKnobTurn();
+
+    Serial.println(SensorReading);
+
     // see if conditions are right to send a note
     strikeDetected = SensorReading > THRESHOLD && !triggering && !triggered && !resting;
 
@@ -56,30 +65,7 @@ void XiaoPiezoDrum::RunCycle() {
     else if (resting) DetermineRestingState();
 
     LED.update();
-//    SerialPlotStages();
-    btnClicked = knob.wasClicked();
-    knobState = knob.checkPosition();
-//    knob.SerialPlotStates();
-
-    if (btnClicked) handleButtonClick();
-    // if the knob was turned in either direction, call handleKnobTurn passing in the direction indicator:
-    if (knobState >= 0) handleKnobTurn();
-//    // if the knob was turned this loop:
-//    if (knobState >= 0) {
-//        // if we are not in the mode to change the rimshot note:
-//        if (!changeRimshotNote) {
-//            // change the primary note number by one
-//            Note += (knobState == 1) ? 1 : -1;  // if it was turned right, add 1, if left, subtract 1
-//            display.setNote1(Note);
-//            display.HomeScreen();
-//        }
-//        // if we are in the mode to change the rimshot note:
-//        else {
-//            NoteRim += (knobState == 1) ? 1 : -1;  // change that note depending on the direction of the turn
-//            display.setNote2(NoteRim);
-//            display.HomeScreen();
-//        }
-//    }
+    //SerialPlotStages();
 }
 
 void XiaoPiezoDrum::TriggerHit() {
@@ -172,9 +158,11 @@ void XiaoPiezoDrum::initDisplay() {
 }
 
 void XiaoPiezoDrum::handleKnobTurn() {
-    // if we are in selection mode rather than value editing mode
+    // if we are in selection mode rather than value editing mode:
     if (menuScrolling) {
+        // if we are on the home screen:
         if (onHomeScreen) {
+            // if the knob turned right, add one to the note
             int itemSelected = homeScreenSelection + ((knobState == 0) ? -1 : 1);
             if (itemSelected < 0) itemSelected = NUM_HOMESCREEN_ITEMS - 1;
             homeScreenSelection = itemSelected % NUM_HOMESCREEN_ITEMS;
@@ -201,7 +189,7 @@ void XiaoPiezoDrum::handleKnobTurn() {
         }
     }
     if (onHomeScreen) display.HomeScreen();
-
+    else display.SettingsScreen();
 }
 
 void XiaoPiezoDrum::handleButtonClick() {
@@ -209,8 +197,26 @@ void XiaoPiezoDrum::handleButtonClick() {
         if (homeScreenSelection != NUM_HOMESCREEN_ITEMS - 1) {
             toggleMenuSelect();
             display.setEditingValue(changeMenuValue);
+            display.HomeScreen();
         }
-        else toggleSettingsScreen();
-        display.HomeScreen();
+        else {
+            toggleSettingsScreen();
+        }
     }
+    else {
+        if (settingsSelection == 0) {
+            toggleSettingsScreen();
+        }
+        else {
+            display.SettingsScreen();
+        }
+    }
+}
+
+// to switch back and forth between the Home and Settings screens
+void XiaoPiezoDrum::toggleSettingsScreen() {
+    onHomeScreen = !onHomeScreen;
+    onSettingsScreen = !onSettingsScreen;
+    if (onHomeScreen) display.HomeScreen();
+    else if (onSettingsScreen) display.SettingsScreen();
 }
