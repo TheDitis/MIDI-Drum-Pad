@@ -65,7 +65,7 @@ void XiaoPiezoDrum::RunCycle() {
     else if (resting) DetermineRestingState();
 
     LED.update();
-    //SerialPlotStages();
+    SerialPlotStages();
 }
 
 void XiaoPiezoDrum::TriggerHit() {

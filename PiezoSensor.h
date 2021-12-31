@@ -8,7 +8,7 @@
 
 
 #define SMOOTH_AMT 100  // NOT CURRENTLY USED
-#define OFFSET (-10)  // to offset the resting level of the sensor so that it sits at 0
+#define OFFSET (-14)  // to offset the resting level of the sensor so that it sits at 0
 
 class PiezoSensor {
 public:
